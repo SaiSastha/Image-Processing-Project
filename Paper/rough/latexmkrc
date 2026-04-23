@@ -1,0 +1,12 @@
+$pdflatex = 'lualatex -shell-escape -interaction=nonstopmode -synctex=1 %O %S';
+$pdf_mode = 1;
+
+$aux_dir = 'build';
+$out_dir = 'build';
+
+$pdf_previewer = 'zathura';
+$pdf_update_method = 2;
+
+$recorder = 1;
+
+$clean_ext = 'synctex.gz synctex(busy) aux bbl blg idx ind lof log lot out toc fls fdb_latexmk';

@@ -1,0 +1,310 @@
+\documentclass{report}
+
+\input{preamble}
+\input{macros}
+% \input{letterfonts}
+
+
+
+\title{rough stuff}
+\author{author name}
+\date{}
+
+\begin{document}
+\maketitle
+
+{\huge Our Problem satement}
+
+
+
+\begin{equation}
+	u_{tt} + \gamma u_t = \operatorname{div}(c(|\nabla u|)\nabla u)
+\end{equation}
+
+Develop a learnable architecture for \(u_{tt} + \gamma u_t = \operatorname{div}(c(|\nabla u|)\nabla u)\). For additive Gaussian noise removal and compare with TNRD, PDE model (given in the reference) for a chosen noise level.
+
+Fix $\phi_i, \gamma$ and learn other parameters stage wise. ( \therefore greedy training)
+
+\section{TNRD Model}
+
+\begin{equation}
+	u_t = \sum_{k=1}^{K} f_k'(u) * \phi_k(f_k * u)
+\end{equation}
+
+Where
+\begin{enumerate}
+	\item{$f_k$} learned liner filters
+	\item{$\phi_k$} Learned "influence" (activation) functions
+	\item{$*$} convoluton
+	\item{$\mathcal{E}(u)$} gradient decent step energy?
+\end{enumerate}
+
+\begin{equation}
+	u^{(n+1)} = u^{(n)} - \sum_{k=1}^{K} f_k^T * \phi_k(f_k * u^{(n)}) + \text{reaction term}
+\end{equation}
+
+\nt{this is in first order time only $u^{(n)}$ is needed to compute $u^{(n+1)}$.
+}
+
+\pagebreak
+
+\section{Our Model}
+
+\begin{equation}
+	u_{tt} + \gamma u_t = \operatorname{div}(c(|\nabla u|)\nabla u)
+\end{equation}
+
+The presence of $u_{tt}$ introduces wave-like (inertial) behaviour, damped by $\gamma u_t$.
+This is a \textbf{hyperbolic} PDE (second-order in time).
+
+\section*{Finite Difference Discretization}
+
+Let $a = \Delta t$ (time step) and $h = \Delta x = \Delta y$ (spatial step).
+Pixel at position $(i,j)$, time level $n$.
+
+\subsection*{Time derivatives}
+
+Central difference for $u_{tt}$:
+\begin{equation}
+	u_{tt}\big|_{i,j}^n = \frac{u_{i,j}^{n+1} - 2u_{i,j}^n + u_{i,j}^{n-1}}{a^2}
+\end{equation}
+
+Forward difference for $u_t$:
+\begin{equation}
+	\gamma u_t\big|_{i,j}^n = \gamma \cdot \frac{u_{i,j}^{n+1} - u_{i,j}^n}{a}
+\end{equation}
+
+\subsection*{Spatial diffusion term (RHS)}
+
+Half-point diffusivity coefficients (arithmetic averaging):
+\begin{equation}
+	c_{i+\frac{1}{2},j} = \frac{c_{i+1,j}+c_{i,j}}{2}, \quad
+	c_{i-\frac{1}{2},j} = \frac{c_{i-1,j}+c_{i,j}}{2}, \quad
+	c_{i,j+\frac{1}{2}} = \frac{c_{i,j+1}+c_{i,j}}{2}, \quad
+	c_{i,j-\frac{1}{2}} = \frac{c_{i,j}+c_{i,j-1}}{2}
+\end{equation}
+
+Discretized divergence:
+\begin{equation}
+	\operatorname{div}(c\nabla u)\big|_{i,j}^n =
+	\frac{
+		c_{i+\frac{1}{2},j}(u_{i+1,j}^n - u_{i,j}^n)
+		- c_{i-\frac{1}{2},j}(u_{i,j}^n   - u_{i-1,j}^n)
+	}{h^2}
+	+
+	\frac{
+		c_{i,j+\frac{1}{2}}(u_{i,j+1}^n - u_{i,j}^n)
+		- c_{i,j-\frac{1}{2}}(u_{i,j}^n   - u_{i,j-1}^n)
+	}{h^2}
+\end{equation}
+
+\subsection*{Combined LHS and rearrangement}
+
+Substituting into the PDE and multiplying through by $a^2$:
+\begin{equation}
+	u_{i,j}^{n+1}(1 + \gamma a) - (2 + \gamma a)\,u_{i,j}^n + u_{i,j}^{n-1}
+	= a^2 \cdot \operatorname{div}(c\nabla u)\big|_{i,j}^n
+\end{equation}
+
+\textbf{Update formula} (solved for $u^{n+1}$):
+\begin{equation}
+	\boxed{
+	u_{i,j}^{n+1} = \frac{a^2\cdot\operatorname{div}(c\nabla u)\big|_{i,j}^n
+	+ (2 + \gamma a)\,u_{i,j}^n - u_{i,j}^{n-1}}{1 + \gamma a}
+	}
+\end{equation}
+
+\nt{
+	This is second-order in time: both $u^n$ \textbf{and} $u^{n-1}$ are needed at each stage.
+	Initialization: $u^{-1} = u^0 = \tilde{u}$ (zero initial velocity assumption).
+}
+
+\opnc{}{ Everything is clanked out, someone please verify and let me know}
+
+
+
+\opnc{idk some shit an llm split out someone needs to check it out}{
+	\textbf{⚠️ Subtle issues (important)}
+
+	\paragraph{❗ 1. Time discretization inconsistency}
+
+	You used:
+	\begin{itemize}
+		\item Central difference for $u_{tt}$ (second-order accurate)
+		\item Forward difference for $u_t$ (first-order accurate)
+	\end{itemize}
+
+	This makes the overall scheme only \textbf{first-order accurate in time}.
+
+	\medskip
+
+	\noindent
+	\textbf{👉 For consistency, use central difference for $u_t$:}
+	\begin{equation}
+		u_t \approx \frac{u^{n+1} - u^{n-1}}{2a}
+	\end{equation}
+
+	Then the scheme becomes fully \textbf{second-order accurate in time}.
+
+	\medskip
+
+	\noindent
+	\textbf{✔️ Improved (recommended) scheme}
+
+	Using central differences for both $u_{tt}$ and $u_t$:
+	\begin{equation}
+		\frac{u^{n+1} - 2u^n + u^{n-1}}{a^2}
+		+ \gamma \frac{u^{n+1} - u^{n-1}}{2a}
+		= \operatorname{div}(c \nabla u)^n
+	\end{equation}
+
+	Rearranging gives a clean, symmetric update rule, which is often preferable for learnable architectures.
+
+	\paragraph{❗ 2. Stability (very important)}
+
+	This is a \textbf{hyperbolic PDE} (wave-like), so stability is non-trivial.
+
+	A CFL-type condition is required:
+	\begin{equation}
+		\frac{a}{h} \leq C
+	\end{equation}
+	where $C$ depends on the diffusivity function $c(\cdot)$.
+
+	\medskip
+
+	\noindent
+	\textbf{⚠️ If violated:}
+	\begin{itemize}
+		\item Oscillations
+		\item Exploding solutions
+	\end{itemize}
+
+	\medskip
+
+	\noindent
+	In learning-based implementations, this manifests as:
+	\begin{itemize}
+		\item Unstable training
+		\item Exploding gradients
+	\end{itemize}
+}
+
+\pagebreak
+
+
+
+
+\section*{Key Structural Differences}
+
+\begin{center}
+	\begin{tabular}{lll}
+		\hline
+		\textbf{Property} & \textbf{TNRD}                & \textbf{Our Model}                          \\
+		\hline
+		PDE order in time & 1st (parabolic)              & 2nd (hyperbolic)                            \\
+		State per stage   & $u^n$ only                   & $u^n$ and $u^{n-1}$                         \\
+		Diffusion term    & Filter bank $+$ influence fn & $\operatorname{div}(c(|\nabla u|)\nabla u)$ \\
+		Damping           & None                         & $\gamma u_t$                                \\
+		Fixed params      & None (all learned)           & $\phi_i$, $\gamma$ fixed                    \\
+		Learning strategy & Greedy or joint              & Stage-wise (greedy)                         \\
+		\hline
+	\end{tabular}
+\end{center}
+
+{\huge TNRD Discretization}
+
+\section*{How TNRD is Discretized}
+
+TNRD discretizes a gradient descent flow on a regularization energy. The continuous update is:
+\begin{equation}
+	u_t = -\nabla \mathcal{E}(u) = \sum_{k=1}^{K} f_k^T * \phi_k(f_k * u)
+\end{equation}
+An explicit Euler step with step size $\rho$ gives the $n$-th stage update:
+\begin{equation}
+	u^{(n+1)} = u^{(n)} + \rho^{(n)} \left[
+	\sum_{k=1}^{K} \left(f_k^{(n)}\right)^T * \phi_k^{(n)}\!\left(f_k^{(n)} * u^{(n)}\right)
+	- \lambda(u^{(n)} - \tilde{u})
+	\right]
+\end{equation}
+where:
+\begin{itemize}
+	\item $f_k^{(n)}$ are stage-dependent learned convolutional filters,
+	\item $\phi_k^{(n)}$ are stage-dependent learned influence functions (nonlinearities),
+	\item $\lambda(u^{(n)} - \tilde{u})$ is the reaction/data fidelity term ($\tilde{u}$ = noisy input),
+	\item $\rho^{(n)}$ is a learned step size.
+\end{itemize}
+The network is unrolled for $T$ stages (typically $T \leq 10$) and trained end-to-end or greedily.
+
+
+\section*{Learnable Architecture from Our Model}
+
+\subsection*{Discretization as a Learned Network}
+
+From the explicit time discretization:
+\begin{equation}
+	u^{n+1} = \frac{1}{1 + \frac{\gamma\tau}{2}}\left[
+	2u^n - \left(1 - \frac{\gamma\tau}{2}\right)u^{n-1}
+	+ \tau^2\, \operatorname{div}(c(|\nabla u^n|)\nabla u^n)
+	\right]
+\end{equation}
+
+We replace the diffusion operator $\operatorname{div}(c(|\nabla u|)\nabla u)$ with a learnable filter-bank approximation. Let $\{f_k\}_{k=1}^K$ be learned convolutional filters and $\phi_k$ fixed influence functions. Then the $n$-th stage update becomes:
+
+\begin{equation}
+	u^{(n+1)} = \frac{1}{1 + \frac{\gamma\tau}{2}}\left[
+	2u^{(n)} - \left(1 - \frac{\gamma\tau}{2}\right)u^{(n-1)}
+	+ \tau^2 \sum_{k=1}^{K} \left(f_k^{(n)}\right)^T * \phi_k\!\left(f_k^{(n)} * u^{(n)}\right)
+	- \tau^2\lambda\left(u^{(n)} - \tilde{u}\right)
+	\right]
+\end{equation}
+
+where:
+\begin{itemize}
+	\item $f_k^{(n)}$ are stage-dependent learned convolutional filters (as in TNRD),
+	\item $\phi_k$ are \emph{fixed} influence functions (not learned, per our greedy training setup),
+	\item $\gamma$ is fixed (not learned),
+	\item $\lambda(u^{(n)} - \tilde{u})$ is the data fidelity term ($\tilde{u}$ = noisy input),
+	\item $\tau$ is the time step (may be absorbed into learned parameters).
+\end{itemize}
+
+\nt{
+	Each stage now requires both $u^{(n)}$ and $u^{(n-1)}$. At stage $n=0$, we initialize $u^{(-1)} = u^{(0)} = \tilde{u}$ (zero initial velocity).
+}
+
+\subsection*{Coefficient Comparison}
+\begin{center}
+	\begin{tabular}{lll}
+		\hline
+		\textbf{Term}              & \textbf{TNRD coefficient} & \textbf{Our Model coefficient}                \\
+		\hline
+		Current state $u^{(n)}$    & $1$                       & $\dfrac{2}{1 + \gamma\tau/2}$                 \\[6pt]
+		Previous state $u^{(n-1)}$ & ---                       & $-\dfrac{1 - \gamma\tau/2}{1 + \gamma\tau/2}$ \\[6pt]
+		Diffusion term             & $\rho^{(n)}$              & $\dfrac{\tau^2}{1 + \gamma\tau/2}$            \\[6pt]
+		Data fidelity              & $-\rho^{(n)}\lambda$      & $-\dfrac{\tau^2\lambda}{1 + \gamma\tau/2}$    \\
+		\hline
+	\end{tabular}
+\end{center}
+
+The scalar $\alpha = \tfrac{1}{1+\gamma\tau/2}$ and $\beta = \tfrac{1-\gamma\tau/2}{1+\gamma\tau/2}$ can themselves be treated as learnable scalars (subject to $\alpha, \beta > 0$ and $\beta < 1$ for stability), while $\phi_k$ and $\gamma$ remain fixed.
+
+\subsection*{Learned vs Fixed Parameters}
+
+\begin{itemize}
+	\item \textbf{Learned} (per stage $n$):
+	      \begin{itemize}
+		      \item $f_k^{(n)}$ — convolutional filters
+		      \item $\alpha = \dfrac{1}{1+\gamma\tau/2}$, $\beta = \dfrac{1-\gamma\tau/2}{1+\gamma\tau/2}$ — momentum/damping scalars
+		      \item $\lambda$ — data fidelity weight
+	      \end{itemize}
+	\item \textbf{Fixed}:
+	      \begin{itemize}
+		      \item $\phi_k$ — influence functions
+		      \item $\gamma$ — damping coefficient
+	      \end{itemize}
+\end{itemize}
+
+\nt{The filters $f_k^{(n)}$ carry the expressive power; $\alpha, \beta$ are just 2 scalars per stage and $\lambda$ a single scalar.}
+
+
+
+\end{document}
