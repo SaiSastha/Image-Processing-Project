@@ -1,0 +1,8 @@
+.venv
+__pycache__
+data/
+checkpoints/
+scratch
+scratch/
+info/TNRD-Codes/
+outputs/

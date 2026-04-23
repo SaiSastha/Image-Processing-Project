@@ -1,0 +1,92 @@
+Proposed Experiments for Supplementary/Ablation Study
+=====================================================
+
+Baseline (Reference):
+  uv run main.py train --sigma 25 --stages 10 --epochs 50 --train-on foe400
+  Time: ~3 hours
+
+NOTE: To fit 15 experiments into 12-15 hours, many "Parameter" experiments 
+should be run with 5 stages and 20 epochs. This is enough to see the trend 
+without waiting 3 hours.
+
+-------------------------------------------------------------------------------
+GROUP A: ARCHITECTURAL ABLATIONS (High Impact)
+-------------------------------------------------------------------------------
+
+1. Order of Dynamics (Isolating u_tt)
+   - Goal: Prove second-order inertia (u_tt) beats first-order diffusion.
+   - Method: Set 'coeff_prev' to 0 (requires a small code tweak or forcing params).
+   - Time: 1 hour (run with --stages 5 --epochs 30)
+
+2. Influence Function (Phi) Battle
+   - Goal: Compare Soft-Thresholding vs. Lorentzian vs. Gaussian Derivatives.
+   - Commands:
+     uv run main.py train --phi soft_threshold --stages 5 --epochs 30
+     uv run main.py train --phi gaussian_deriv --stages 5 --epochs 30
+     uv run main.py train --phi lorentzian      --stages 5 --epochs 30
+   - Time: ~1 hour each (Total 3h)
+
+3. Fixed Physics vs. Learned Coefficients
+   - Goal: Does allowing the network to "deviate" from discretization math help?
+   - Command:
+     uv run main.py train --lr-scalars 0.0 --stages 5 --epochs 30 (Fixed)
+     uv run main.py train --lr-scalars 0.1 --stages 5 --epochs 30 (Learned)
+   - Time: ~2 hours total
+
+-------------------------------------------------------------------------------
+GROUP B: PARAMETER SENSITIVITY (Easy "uv run" commands)
+-------------------------------------------------------------------------------
+
+4. Filter Bank Width (K)
+   - Goal: Impact of complexity (number of kernels).
+   - Commands:
+     uv run main.py train --filters 8  --stages 5 --epochs 30
+     uv run main.py train --filters 48 --stages 5 --epochs 30
+   - Time: ~2 hours total
+
+5. Receptive Field (Filter Size)
+   - Goal: Impact of filter spatial support.
+   - Commands:
+     uv run main.py train --filter-size 3 --stages 5 --epochs 30
+     uv run main.py train --filter-size 9 --stages 5 --epochs 30
+   - Time: ~2 hours total
+
+6. Damping Sensitivity (Gamma)
+   - Goal: Impact of the "Physical Damping" constant on stability.
+   - Commands:
+     uv run main.py train --gamma 0.1 --stages 5 --epochs 30
+     uv run main.py train --gamma 0.9 --stages 5 --epochs 30
+   - Time: ~2 hours total
+
+-------------------------------------------------------------------------------
+GROUP C: TRAINING & DATA (Generalization)
+-------------------------------------------------------------------------------
+
+7. Stage Saturation (Depth)
+   - Goal: At what point do more stages stop helping?
+   - Command:
+     uv run main.py train --stages 3  --epochs 30
+     uv run main.py train --stages 15 --epochs 30
+   - Time: ~3 hours total
+
+8. Loss Function Impact (MSE vs L1)
+   - Goal: Does L1 loss preserve edges better than MSE for this PDE?
+   - Command:
+     uv run main.py train --loss l1 --stages 5 --epochs 30
+   - Time: 1 hour
+
+9. Noise Generalization (Evaluation Only - FAST)
+   - Goal: Test if a Sigma=25 model can handle Sigma=15 or 50.
+   - Command:
+     uv run main.py evaluate checkpoints/sigma25_final.pt --sigma 15
+     uv run main.py evaluate checkpoints/sigma25_final.pt --sigma 50
+   - Time: 5 minutes (Zero training)
+
+-------------------------------------------------------------------------------
+SUMMARY OF ESTIMATED TIME (Fast Track)
+-------------------------------------------------------------------------------
+If you run with --stages 5 and --epochs 30:
+- Exps 1-3 (Architecture): 6 hours
+- Exps 4-6 (Params): 4 hours
+- Exps 7-9 (Generalization): 4 hours
+Total: ~14 hours for ~12-14 unique data points.

@@ -1,0 +1,42 @@
+Too lazy to write a proper readme for now, this is a general gist of random stuff
+
+- We are using pytorch, the pyproject.toml should be setup to use cuda 12.1, if you have a version below 12.1 it might (should) fail?
+
+
+- most of the code is vibecoded slop for now, will have a better look at everything this wednesday / thursday, but someone needs to go over the maths and make sure everything is right/give a proper recurence relation i can go off of
+
+
+
+Instructions
+===========
+
+1. Install uv 
+    - https://docs.astral.sh/uv/getting-started/installation/
+
+2. Sync dependencies (GPU Setup)
+    -Nvidia (Windows/Linux): Need [CUDA Toolkit 12.1+](https://developer.nvidia.com/cuda-12-1-0-download-archive). `pyproject.toml` defaults to cu121. Just run `uv sync`.
+    - Mac (Silicon): No extra drivers needed. Edit `pyproject.toml`: remove `[[tool.uv.index]]` block and `+cu121` suffix from torch/torchvision. Run `uv sync`.
+    - AMD (Linux): Need [ROCm drivers](https://rocm.docs.amd.com/en/latest/deploy/linux/index.html). Change index URL in `pyproject.toml` to `https://download.pytorch.org/whl/rocm6.0`. Run `uv sync`.
+
+3. Download the data
+    - uv run main.py download --dataset cbsd68
+
+=====
+
+uv run main.py train \
+  --sigma 25 \
+  --stages 5 \
+  --epochs 30 \
+  --filters 24 \
+  --filter-size 7 \
+  --loss mse \
+  --phi soft_threshold \
+  --gamma 0.5 \
+  --train-on cbsd68 \
+  --visualize-every 5
+
+
+uv run main.py evaluate checkpoints/sigma25_final.pt \
+  --test-on cbsd68 \
+  --show-diffusion \
+  --save-images

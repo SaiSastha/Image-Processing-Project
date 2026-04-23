@@ -1,0 +1,57 @@
+1. does dataset size effect psnr score?? graph with this idk
+2.  use ssim? structual similarity index
+3.  can we try differnt types of noise, practical images where noisee occurs naturally.
+4.  joint vs greedy
+5. learn filter size
+5. Why is our mdoel overffiting so easily, figure out, why epochs so low
+6.  noise generlization, trained on one lvl of noise, try on another
+7. images where noise is onlly in some sectins, can we isolate
+8. Order of Dynamics: Force coeff_prev = 0 to see if $u_{tt}$ actually helps.
+9. Go from b&w to rgb
+10. make gamma learnable
+11. can each stage have diff influence functions (learnable or manualy fixed)
+12. larn inifluece functions(hard idk)
+13. what if we do joing + greedy (like we train for a while in greedy then switch to joint, or the other way, or multiple loops)
+14.  mmulti noise training (randomly give random shit)
+15. Image which has patches of diff noisee
+16. layered multiple noise types
+17. start with low noise, and slowly increase it - can it generalize bettwr
+18. denosiing a video - since it is second derivative, we can find utt from the video itself? idk
+19. can we add residual connections
+20. we have to try more stages
+21. can we decrase the number of weights (kernals from 48 - 24) and somehhow keep psnr up
+22. - Adaptive Depth: Implement "Early Exit" where the model stops unrolling if the difference between $u^n$ and $u^(n-1)$ is below a threshold (saving (so epoch 2 ig)
+
+
+
+
+- Can a kernal  detetecr noise, and we denoise there
+
+
+- Hybrid PDE-CNN: Use the Hyperbolic PDE as a "Base" and add a tiny U-Net at the end to clean up residual artifacts.
+- Filter Visualization & Spectrum: Analyze the learned $7 times 7$ kernels in the Fourier domain. Do they learn standard Sobel/Laplacian operators or something
+- Energy Landscape Mapping: Prove the model is a Lyapunov Stable system by checking if the "Energy" $E(u) = sum rho(f * u)$ strictly decreases across unrolled
+
+
+
+We want to test stuff better
+- testing ci should test for multiple types of noise
+- multiple lvls
+- multiple types of images
+- brand new noise 
+- genelziation tests
+
+
+
+
+1. We can also visuzlize filters, for the ppt/ paper
+- Momentum Evolution: Plot the learned $alpha$ and $beta$ scalars across stages. Does the model naturally choose higher inertia in early or late stages?
+2. We can have graphs for alpha, beta
+3. graphs for anything we learn
+4. 
+
+What boundary conditions did we use? 
+
+
+
+

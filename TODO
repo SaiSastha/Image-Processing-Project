@@ -1,0 +1,15 @@
+- [ ] Verify the discretization is right
+- [ ] Add the TNRD dataset, more datasets?
+- [ ] Find out the hyper params from the paper he gave as ref.
+- [ ] The actual paper (overleaf / submodule)
+- [ ] Abilation studies
+    - [ ] Hyper params
+    - [ ] Actual model itself / the structure
+    - [ ] Loss function
+- [ ] Extra stuff
+    - [ ] Different noise types
+    - [ ] Stuff from the TNRD paper, JPEG noise thing?
+    - [ ] What about video? Video compression
+- [ ] Slides
+
+- [X] ~Loss function? PSNR? (Peak Signal-to-Noise Ratio) idk is apparently more sota for diffusion/image procesing? idk~ Apparenlty PSNR is just for evaluvation? not a loss function

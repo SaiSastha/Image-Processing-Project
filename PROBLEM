@@ -1,0 +1,8 @@
+u_{tt} + \gamma u_t = \operatorname{div}(c(|\nabla u|)\nabla u)
+
+Develop a learnable architecture for utt + γut = div(c(|∇u|)∇u) for additive
+Gaussian noise removal and compare with TNRD, PDE model (given in the
+reference) for a chosen noise level. Fix ϕi, γ and learn other parameters stagewise.
+
+Refferences:
+https://epubs.siam.org/doi/10.1137/19M1283033
