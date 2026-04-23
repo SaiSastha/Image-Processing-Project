@@ -1,0 +1,62 @@
+{
+    "model": {
+        "K": 24,
+        "filter_size": 7,
+        "T": 5,
+        "gamma": 0.5,
+        "tau": 0.2,
+        "learn_coeffs": true,
+        "phi": "gaussian_deriv",
+        "phi_threshold": 0.01,
+        "phi_sigma": 1.0,
+        "phi_scale": 1.0,
+        "lambda_init": 0.1
+    },
+    "train": {
+        "output_root": "runs",
+        "sigma": 25,
+        "patch_size": 40,
+        "batch_size": 128,
+        "epochs_per_stage": 20,
+        "loss_fn": "mse",
+        "lr_filters": 0.001,
+        "lr_scalars": 0.01,
+        "adam_betas": [
+            0.9,
+            0.999
+        ],
+        "weight_decay": 0.0001,
+        "grad_clip": 1.0,
+        "seed": 42,
+        "checkpoint_dir": "runs/run_20260422_040151/checkpoints",
+        "save_every": 10,
+        "device": "auto",
+        "num_workers": 4,
+        "visualize_every": 5
+    },
+    "data": {
+        "data_root": "data",
+        "train_datasets": [
+            "foe400"
+        ],
+        "test_datasets": [
+            "cbsd68"
+        ],
+        "bsds500_url": "http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz",
+        "cbsd68_hf_name": "deepinv/CBSD68",
+        "grayscale": true,
+        "augment": true,
+        "allow_synthetic": false
+    },
+    "eval": {
+        "sigma_list": [
+            15,
+            25,
+            50
+        ],
+        "save_images": true,
+        "output_dir": "runs/run_20260422_040151/outputs",
+        "num_save": 5,
+        "show_diffusion_stages": true
+    }
+}

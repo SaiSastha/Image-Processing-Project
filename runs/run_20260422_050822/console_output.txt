@@ -1,0 +1,10 @@
+
+Run directory: runs/run_20260422_050822
+Training datasets : ['foe400']
+Test dataset      : cbsd68
+Loss function     : MSE  (MSE matches TNRD paper)
+Stages            : 3  (unrolled PDE steps, NOT epochs)
+Epochs per stage  : 20  (full passes over training data)
+
+
+Starting final evaluation...
